@@ -1,0 +1,4 @@
+aws_region             = "us-east-1"
+security_account_id    = "PASTE_FROM_MANAGEMENT_OUTPUT"
+management_account_id  = "691304835972"
+external_id            = "PASTE_SAME_VALUE_USED_IN_DEV"

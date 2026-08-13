@@ -1,0 +1,8 @@
+# Copy to terraform.tfvars and fill in.
+# dev_account_id and management_account_id come from:
+#   cd ../management && terraform output
+
+aws_region             = "us-east-1"
+dev_account_id         = "PASTE_FROM_MANAGEMENT_OUTPUT"
+management_account_id  = "691304835972"
+external_id            = "PASTE_OUTPUT_OF_openssl_rand_-hex_16"

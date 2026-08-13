@@ -1,0 +1,13 @@
+# Copy this to terraform.tfvars and fill in real values.
+# terraform.tfvars is gitignored - never commit real account emails/IDs if
+# you want to keep this repo public without doxxing your AWS account setup.
+
+aws_region = "us-east-1"
+
+# Use "+" email aliases - AWS requires every account email to be globally
+# unique, and Gmail (and most providers) treat you+anything@gmail.com as
+# the same inbox.
+security_account_email    = "youremail+lz-security@gmail.com"
+log_archive_account_email = "youremail+lz-logs@gmail.com"
+dev_account_email         = "youremail+lz-dev@gmail.com"
+prod_account_email        = "youremail+lz-prod@gmail.com"
