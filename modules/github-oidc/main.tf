@@ -53,9 +53,12 @@ resource "aws_iam_role" "github_actions_ci" {
             "token.actions.githubusercontent.com:aud" = "sts.amazonaws.com"
           }
           StringLike = {
-            # Restricts to this exact repo. The `*` after the colon allows
-            # any branch/PR/tag from that repo, but no other repo can match.
-            "token.actions.githubusercontent.com:sub" = "repo:${var.github_repo}:*"
+            # GitHub's OIDC "sub" claim format now appends numeric owner/repo
+            # IDs after the names (e.g. "repo:owner@12345/repo@67890:ref:...")
+            # rather than the older plain "repo:owner/repo:*" format. The
+            # wildcards here account for that suffix while still requiring
+            # the literal owner and repo name to match.
+            "token.actions.githubusercontent.com:sub" = "repo:${split("/", var.github_repo)[0]}*/${split("/", var.github_repo)[1]}*:*"
           }
         }
       }
