@@ -162,16 +162,16 @@ resource "aws_glue_catalog_table" "cloudtrail" {
   table_type = "EXTERNAL_TABLE"
 
   parameters = {
-    "classification"          = "cloudtrail"
-    "projection.enabled"      = "true"
-    "projection.region.type"  = "enum"
-    "projection.region.values" = "us-east-1,us-east-2"
-    "projection.date.type"    = "date"
-    "projection.date.range"   = "2026/01/01,NOW"
-    "projection.date.format"  = "yyyy/MM/dd"
-    "projection.date.interval" = "1"
+    "classification"                = "cloudtrail"
+    "projection.enabled"            = "true"
+    "projection.region.type"        = "enum"
+    "projection.region.values"      = "us-east-1,us-east-2"
+    "projection.date.type"          = "date"
+    "projection.date.range"         = "2026/01/01,NOW"
+    "projection.date.format"        = "yyyy/MM/dd"
+    "projection.date.interval"      = "1"
     "projection.date.interval.unit" = "DAYS"
-    "storage.location.template" = "s3://${var.log_bucket_name}/AWSLogs/${var.organization_id}/CloudTrail/$${region}/$${date}"
+    "storage.location.template"     = "s3://${var.log_bucket_name}/AWSLogs/${var.organization_id}/CloudTrail/$${region}/$${date}"
   }
 
   storage_descriptor {

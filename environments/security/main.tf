@@ -37,8 +37,8 @@ module "cross_account_iam" {
   source = "../../modules/cross-account-iam"
 
   management_account_id = var.management_account_id
-  account_purpose        = "security"
-  external_id            = var.external_id
+  account_purpose       = "security"
+  external_id           = var.external_id
 }
 
 # Requires the management account to have already designated this account

@@ -37,13 +37,13 @@ module "cross_account_iam" {
   source = "../../modules/cross-account-iam"
 
   management_account_id = var.management_account_id
-  account_purpose        = "logs"
-  external_id            = var.external_id
+  account_purpose       = "logs"
+  external_id           = var.external_id
 }
 
 module "log_bucket" {
   source = "../../modules/logging/log-bucket"
 
-  log_bucket_name  = var.log_bucket_name
-  organization_id  = var.organization_id
+  log_bucket_name = var.log_bucket_name
+  organization_id = var.organization_id
 }
