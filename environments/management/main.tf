@@ -64,3 +64,10 @@ module "guardduty_delegated_admin" {
 
   security_account_id = module.organizations.security_account_id
 }
+
+module "github_oidc" {
+  source = "../../modules/github-oidc"
+
+  github_repo         = "agandbhir123/aws-landing-zone"
+  tfstate_bucket_name = "aaravgandbhir-landing-zone-tfstate"
+}

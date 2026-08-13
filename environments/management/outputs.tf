@@ -45,3 +45,7 @@ output "org_trail_arn" {
 output "guardduty_admin_account_id" {
   value = module.guardduty_delegated_admin.admin_account_id
 }
+
+output "github_actions_role_arn" {
+  value = module.github_oidc.role_arn
+}

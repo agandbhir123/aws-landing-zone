@@ -151,6 +151,38 @@ aws-landing-zone/
 └── docs/                      # Runbooks
 ```
 
+## CI/CD
+
+Every pull request that touches a `.tf` file triggers a GitHub Actions
+workflow (`.github/workflows/terraform.yml`) that:
+
+1. Checks formatting with `terraform fmt -check`
+2. Runs `terraform init` + `terraform validate`
+3. Runs `terraform plan` against the management environment and posts the
+   diff in the workflow log
+
+**Authentication uses OIDC, not stored AWS access keys.** GitHub's OIDC
+provider is registered in the management account (`modules/github-oidc`),
+and a dedicated IAM role trusts only this exact repo (`agandbhir123/aws-landing-zone`)
+via the `sub` claim in GitHub's signed token — no other repo, fork, or
+workflow anywhere can assume it. The role has `ReadOnlyAccess` plus scoped
+write access to only the Terraform state bucket and lock table.
+
+**CI never runs `terraform apply`.** This is deliberate: this repo controls
+a real AWS Organization, and giving a CI pipeline write access to that is a
+larger blast radius than a personal project needs to accept. Applies stay a
+manual, human-run step from a local machine after reviewing the plan.
+
+**One-time setup to make CI work in a fork or new copy of this repo:**
+1. Apply `environments/management` once locally (as done throughout this
+   README) to create the OIDC provider and IAM role
+2. Copy the `github_actions_role_arn` output value
+3. In the GitHub repo settings → Secrets and variables → Actions, add:
+   - `AWS_GITHUB_ACTIONS_ROLE_ARN` = that ARN
+   - `TF_VAR_security_account_email`, `TF_VAR_log_archive_account_email`,
+     `TF_VAR_dev_account_email`, `TF_VAR_prod_account_email`,
+     `TF_VAR_log_bucket_name` = same values as your local `terraform.tfvars`
+
 ## Status
 
 - [x] Organizations + 5-account OU structure
@@ -159,7 +191,7 @@ aws-landing-zone/
 - [x] Centralized CloudTrail logging + Athena
 - [x] GuardDuty delegated admin + org-wide auto-enrollment
 - [x] Automated guardrail test suite (7/7 passing)
-- [ ] CI/CD (GitHub Actions) — optional stretch, not yet built
+- [x] CI/CD (GitHub Actions) — fmt/validate/plan on every PR via OIDC, no stored AWS keys
 
 ## Cost note
 

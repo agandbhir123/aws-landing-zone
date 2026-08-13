@@ -1,0 +1,75 @@
+name: Terraform CI
+
+# Runs on every PR that touches Terraform files, and on pushes to main for
+# visibility. Never runs `terraform apply` - this pipeline can tell you
+# what WOULD change, but a human runs the actual apply locally. That's a
+# deliberate choice: this repo controls a real AWS Organization, and CI
+# having write access to that is a bigger blast radius than a portfolio
+# project needs to accept.
+on:
+  pull_request:
+    paths:
+      - "**.tf"
+      - ".github/workflows/terraform.yml"
+  push:
+    branches: [main]
+    paths:
+      - "**.tf"
+
+permissions:
+  id-token: write   # required for OIDC - this is what lets AWS trust the workflow
+  contents: read
+
+jobs:
+  fmt-check:
+    name: Terraform fmt check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.15.8"
+
+      - name: Check formatting
+        run: terraform fmt -check -recursive
+
+  plan:
+    name: Plan (management)
+    runs-on: ubuntu-latest
+    needs: fmt-check
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.15.8"
+
+      # OIDC auth - no AWS access keys stored anywhere in this repo or its
+      # GitHub secrets. The role trust policy only allows THIS repo to
+      # assume it (see modules/github-oidc).
+      - name: Configure AWS credentials via OIDC
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_GITHUB_ACTIONS_ROLE_ARN }}
+          aws-region: us-east-1
+
+      - name: Terraform init
+        working-directory: environments/management
+        run: terraform init
+
+      - name: Terraform validate
+        working-directory: environments/management
+        run: terraform validate
+
+      - name: Terraform plan
+        working-directory: environments/management
+        run: terraform plan -no-color
+        env:
+          # These come from repo variables/secrets, not committed anywhere -
+          # see the README for how to set them up.
+          TF_VAR_security_account_email: ${{ secrets.TF_VAR_SECURITY_ACCOUNT_EMAIL }}
+          TF_VAR_log_archive_account_email: ${{ secrets.TF_VAR_LOG_ARCHIVE_ACCOUNT_EMAIL }}
+          TF_VAR_dev_account_email: ${{ secrets.TF_VAR_DEV_ACCOUNT_EMAIL }}
+          TF_VAR_prod_account_email: ${{ secrets.TF_VAR_PROD_ACCOUNT_EMAIL }}
+          TF_VAR_log_bucket_name: ${{ secrets.TF_VAR_LOG_BUCKET_NAME }}
